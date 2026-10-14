@@ -5,6 +5,7 @@
   min-width: 0;
 }
 .conversation-header {
+  flex-shrink: 0;
   padding: 26px 28px 22px;
   border-bottom: 1px solid var(--line);
   display: flex;
@@ -27,6 +28,7 @@ h2 span {
 .message-list {
   overflow: auto;
   flex: 1;
+  min-height: 0;
   padding: 12px 28px;
   overscroll-behavior: contain;
 }
@@ -99,6 +101,7 @@ h2 span {
   overflow-wrap: anywhere;
 }
 .composer {
+  flex-shrink: 0;
   padding: 18px 28px 20px;
   border-top: 1px solid var(--line);
   background: var(--white);
@@ -142,6 +145,7 @@ h2 span {
   white-space: nowrap;
 }
 .connection-feedback {
+  flex-shrink: 0;
   padding: 12px 28px;
   background: var(--pale);
 }
@@ -153,20 +157,15 @@ h2 span {
 @media (max-width: 760px) {
   :host {
     grid-row: 4;
-    min-height: 60dvh;
   }
   .conversation-header {
     padding: 22px 20px 18px;
   }
   .message-list {
     padding: 10px 20px;
-    max-height: 60dvh;
-    min-height: 200px;
   }
   .composer {
     padding: 16px 20px;
-    position: sticky;
-    bottom: 0;
   }
   .compose-hint {
     font-size: 9px;
@@ -176,5 +175,35 @@ h2 span {
   }
   .empty p {
     font-size: 13px;
+  }
+}
+@media (max-width: 760px) and (max-height: 600px) {
+  .conversation-header {
+    padding: 8px 20px;
+  }
+  .conversation-header .utility,
+  .conversation-header .muted {
+    display: none;
+  }
+  h2 {
+    font-size: 20px;
+    margin-bottom: 0;
+  }
+  .message-list {
+    min-height: 96px;
+  }
+  .composer {
+    padding: 10px 20px;
+  }
+  .compose-row textarea {
+    height: 44px;
+    min-height: 44px;
+    max-height: 96px;
+    padding: 10px;
+  }
+  .connection-feedback {
+    max-height: 56px;
+    overflow: auto;
+    padding: 8px 20px;
   }
 }

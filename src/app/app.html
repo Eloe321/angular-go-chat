@@ -1,4 +1,4 @@
-<main class="chat-shell">
+<main class="chat-shell" [class.joined]="chat.selectedRoom() !== null">
   <header class="app-header">
     <div class="brand">
       <span class="brand-mark" aria-hidden="true">[&nbsp;]</span>
