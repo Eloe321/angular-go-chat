@@ -163,6 +163,7 @@ h2 span {
   }
   .message-list {
     padding: 10px 20px;
+    min-height: 96px;
   }
   .composer {
     padding: 16px 20px;
@@ -188,9 +189,6 @@ h2 span {
   h2 {
     font-size: 20px;
     margin-bottom: 0;
-  }
-  .message-list {
-    min-height: 96px;
   }
   .composer {
     padding: 10px 20px;
