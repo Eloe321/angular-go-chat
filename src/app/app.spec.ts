@@ -4,6 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { App } from './app';
 import { CHAT_SOCKET_FACTORY, ChatService } from './chat/chat.service';
 import { ChatSocket, Message, Room } from './chat/chat.models';
+import { CHAT_TIMESTAMP_FORMATTERS } from './chat/conversation';
 
 class FakeSocket implements ChatSocket {
   readyState = 0;
@@ -56,6 +57,13 @@ describe('Chat screen', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        {
+          provide: CHAT_TIMESTAMP_FORMATTERS,
+          useValue: {
+            time: new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+            detail: new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }),
+          },
+        },
         {
           provide: CHAT_SOCKET_FACTORY,
           useValue: () => {
@@ -214,6 +222,16 @@ describe('Chat screen', () => {
     expect(socket.sent).toEqual([]);
     expect(page.querySelector<HTMLTextAreaElement>('#message')!.value).toBe('Keep this draft');
     expect(page.querySelector('[role="status"]')?.textContent).toContain('Reconnecting');
+  });
+  it('renders timestamps in the guest locale while retaining the server UTC datetime', async () => {
+    const socket = await joined();
+    const createdAt = new Date(2026, 9, 14, 14, 5, 0).toISOString();
+    socket.event({ type: 'message.created', message: { ...message('local-time'), createdAt } });
+    fixture.detectChanges();
+    const time = page.querySelector('time');
+    expect(time?.textContent?.trim()).toBe('14:05');
+    expect(time?.getAttribute('title')).toContain('14 oct. 2026');
+    expect(time?.getAttribute('datetime')).toBe(createdAt);
   });
   it('uses a complete Unicode character for guest initials', async () => {
     const socket = await joined();

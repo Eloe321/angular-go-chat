@@ -53,11 +53,9 @@
           @if (message.senderId === chat.sessionId()) {
             <span class="you">you</span>
           }
-          <time
-            [attr.datetime]="message.createdAt"
-            [title]="(message.createdAt | date: 'medium') ?? ''"
-            >{{ message.createdAt | date: 'shortTime' }}</time
-          >
+          <time [attr.datetime]="message.createdAt" [title]="timestampTitle(message.createdAt)">{{
+            timeLabel(message.createdAt)
+          }}</time>
         </div>
         <p>{{ message.content }}</p>
       </div>

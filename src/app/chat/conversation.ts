@@ -1,7 +1,7 @@
-import { DatePipe } from '@angular/common';
 import {
   Component,
   ElementRef,
+  InjectionToken,
   afterRenderEffect,
   computed,
   inject,
@@ -12,9 +12,23 @@ import {
 import { ChatService } from './chat.service';
 import { Room } from './chat.models';
 
+export interface TimestampFormatters {
+  time: Intl.DateTimeFormat;
+  detail: Intl.DateTimeFormat;
+}
+export const CHAT_TIMESTAMP_FORMATTERS = new InjectionToken<TimestampFormatters>(
+  'Native timestamp formatters',
+  {
+    providedIn: 'root',
+    factory: () => ({
+      time: new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' }),
+      detail: new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }),
+    }),
+  },
+);
+
 @Component({
   selector: 'app-conversation',
-  imports: [DatePipe],
   templateUrl: './conversation.html',
   styleUrl: './conversation.css',
   host: { class: 'conversation', role: 'region', 'aria-label': 'Conversation' },
@@ -22,6 +36,7 @@ import { Room } from './chat.models';
 export class Conversation {
   readonly room = input<Room>();
   protected readonly chat = inject(ChatService);
+  private readonly timestampFormatters = inject(CHAT_TIMESTAMP_FORMATTERS);
   protected readonly draft = signal('');
   protected readonly composing = signal(false);
   protected readonly nearBottom = signal(true);
@@ -65,5 +80,13 @@ export class Conversation {
 
   protected initial(name: string): string {
     return Array.from(name)[0]?.toUpperCase() ?? '';
+  }
+
+  protected timeLabel(createdAt: string): string {
+    return this.timestampFormatters.time.format(new Date(createdAt));
+  }
+
+  protected timestampTitle(createdAt: string): string {
+    return this.timestampFormatters.detail.format(new Date(createdAt));
   }
 }
