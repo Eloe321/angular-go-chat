@@ -8,6 +8,10 @@ Choose a display name, join General, Angular, or Go, and exchange messages with 
 
 Requirements: the installed Node 24 and npm 11 toolchain, and Go 1.27.2 or later compatible with this module. Use the versions declared in `package.json` and `go.mod` rather than the older tutorial versions.
 
+Use a checkout whose filesystem path has no colon (`:`). The installed Vite development server rejects such paths even when they are in its file allowlist. Tests and production builds still work from those paths, but the browser development server cannot load its modules.
+
+For this local project, the verified development checkout is `/Users/geloes/Documents/Codex/2026-10-14/che/work/chat-mvp`. The original repository remains at `/Users/geloes/Angular:Go Project/chat-app`, with the MVP integrated on `master`. Both checkouts share the same Git history.
+
 Install dependencies from the repository root:
 
 ```sh
