@@ -1,10 +1,14 @@
 package transport
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
+	"net"
 	"net/http"
 	"sync"
+	"time"
 
 	"chat-app/internal/chat"
 	"github.com/gin-gonic/gin"
@@ -26,7 +30,7 @@ type Server struct {
 	upgrader websocket.Upgrader
 	mu       sync.Mutex
 	closing  bool
-	sockets  map[*websocket.Conn]struct{}
+	sockets  map[net.Conn]struct{}
 	workers  sync.WaitGroup
 	stopOnce sync.Once
 	stopped  chan struct{}
@@ -41,11 +45,11 @@ func New(config Config) *Server {
 	if origins == nil {
 		origins = DefaultOrigins()
 	}
-	s := &Server{store: store, hub: chat.NewHub(store), origins: make(map[string]bool), sockets: make(map[*websocket.Conn]struct{}), stopped: make(chan struct{})}
+	s := &Server{store: store, hub: chat.NewHub(store), origins: make(map[string]bool), sockets: make(map[net.Conn]struct{}), stopped: make(chan struct{})}
 	for _, origin := range origins {
 		s.origins[origin] = true
 	}
-	s.upgrader = websocket.Upgrader{ReadBufferSize: 1024, WriteBufferSize: 1024, CheckOrigin: s.originAllowed, Error: func(w http.ResponseWriter, r *http.Request, status int, reason error) {
+	s.upgrader = websocket.Upgrader{HandshakeTimeout: 5 * time.Second, ReadBufferSize: 1024, WriteBufferSize: 1024, CheckOrigin: s.originAllowed, Error: func(w http.ResponseWriter, r *http.Request, status int, reason error) {
 		writeHTTPError(w, status, "invalid_handshake", "A valid WebSocket upgrade request is required.")
 	}}
 	router := gin.New()
@@ -101,36 +105,70 @@ func (s *Server) upgrade(c *gin.Context) {
 		c.JSON(http.StatusForbidden, chat.Error{Code: "origin_not_allowed", Message: "Browser origin is not allowed."})
 		return
 	}
-	// The lifecycle lock prevents a new hijacked socket from escaping shutdown.
+	// Count pending handshakes before releasing the lifecycle lock. Shutdown
+	// cannot finish while an upgrade may still create a hijacked connection.
 	s.mu.Lock()
 	if s.closing {
 		s.mu.Unlock()
 		c.JSON(http.StatusServiceUnavailable, chat.Error{Code: "service_unavailable", Message: "Chat service is shutting down."})
 		return
 	}
-	conn, err := s.upgrader.Upgrade(c.Writer, c.Request, nil)
+	s.workers.Add(1)
+	s.mu.Unlock()
+	writer := &upgradeWriter{ResponseWriter: c.Writer, server: s}
+	defer func() {
+		if writer.conn != nil {
+			_ = writer.conn.Close()
+			s.mu.Lock()
+			delete(s.sockets, writer.conn)
+			s.mu.Unlock()
+		}
+		s.workers.Done()
+	}()
+	conn, err := s.upgrader.Upgrade(writer, c.Request, nil)
 	if err != nil {
-		s.mu.Unlock()
+		return
+	}
+	s.mu.Lock()
+	closing := s.closing
+	s.mu.Unlock()
+	if closing {
 		return
 	}
 	client, err := s.hub.Join(roomID, name)
 	if err != nil {
-		_ = conn.Close()
-		s.mu.Unlock()
 		return
 	}
-	s.sockets[conn] = struct{}{}
-	s.workers.Add(1)
-	s.mu.Unlock()
-	defer func() {
-		s.hub.Leave(client)
-		_ = conn.Close()
-		s.mu.Lock()
-		delete(s.sockets, conn)
-		s.mu.Unlock()
-		s.workers.Done()
-	}()
+	defer s.hub.Leave(client)
 	s.serveSocket(conn, client)
+}
+
+// upgradeWriter tracks the raw connection immediately after hijacking, before
+// Gorilla writes its handshake response. The same connection remains tracked
+// through the reader/writer lifecycle, so shutdown covers pending and live peers.
+type upgradeWriter struct {
+	http.ResponseWriter
+	server *Server
+	conn   net.Conn
+}
+
+func (w *upgradeWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	conn, buffered, err := w.ResponseWriter.(http.Hijacker).Hijack()
+	if err != nil {
+		return nil, nil, err
+	}
+	w.conn = conn
+	w.server.mu.Lock()
+	closing := w.server.closing
+	if !closing {
+		w.server.sockets[conn] = struct{}{}
+	}
+	w.server.mu.Unlock()
+	if closing {
+		_ = conn.Close()
+		return nil, nil, errors.New("chat service is shutting down")
+	}
+	return conn, buffered, nil
 }
 func writeHTTPError(w http.ResponseWriter, status int, code, message string) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -144,12 +182,19 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	s.stopOnce.Do(func() {
 		s.mu.Lock()
 		s.closing = true
+		connections := make([]net.Conn, 0, len(s.sockets))
 		for conn := range s.sockets {
-			_ = conn.Close()
+			connections = append(connections, conn)
 		}
-		s.hub.Close()
 		s.mu.Unlock()
-		go func() { s.workers.Wait(); close(s.stopped) }()
+		go func() {
+			for _, conn := range connections {
+				_ = conn.Close()
+			}
+			s.hub.Close()
+			s.workers.Wait()
+			close(s.stopped)
+		}()
 	})
 	select {
 	case <-s.stopped:
