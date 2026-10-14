@@ -1,0 +1,246 @@
+:host {
+  display: block;
+}
+.chat-shell {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr) 220px;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100dvh;
+  max-width: 1600px;
+  margin: auto;
+  background: var(--white);
+}
+.app-header {
+  grid-column: 1/-1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 28px;
+  border-bottom: 1px solid var(--line);
+}
+.brand {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.brand-mark {
+  font: 700 24px var(--mono);
+  color: var(--teal);
+}
+h1 {
+  font-size: 23px;
+  letter-spacing: -0.6px;
+}
+.connection {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+.connection span,
+.presence-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+  flex: none;
+}
+.connection[data-state='connected'] span,
+.presence-dot {
+  background: var(--teal);
+}
+.connection[data-state='reconnecting'] {
+  color: var(--warning);
+}
+.room-rail {
+  background: var(--pale);
+  border-right: 1px solid var(--line);
+  padding: 26px 20px;
+  overflow: auto;
+}
+.eyebrow {
+  margin-bottom: 16px;
+}
+.room-list {
+  display: grid;
+  gap: 8px;
+}
+.room {
+  display: flex;
+  gap: 12px;
+  text-align: left;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 12px 10px;
+  background: transparent;
+  width: 100%;
+}
+.room.active {
+  background: var(--white);
+  border-color: var(--line);
+}
+.room:hover {
+  background: var(--white);
+}
+.room-icon {
+  width: 28px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  color: var(--teal);
+  font: 700 17px var(--mono);
+}
+.room strong {
+  font-size: 14px;
+}
+.room small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+.guest {
+  margin-top: 30px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.guest h2 {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+.guest label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.guest input {
+  width: 100%;
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--white);
+}
+.guest button {
+  width: 100%;
+}
+.identity strong {
+  overflow-wrap: anywhere;
+}
+.rail-note,
+.member-note {
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--muted);
+  margin-top: 32px;
+}
+.members {
+  border-left: 1px solid var(--line);
+  padding: 30px 22px;
+  overflow: auto;
+}
+.members summary {
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.member-count {
+  color: var(--muted);
+  font: 11px var(--mono);
+  margin-left: 8px;
+}
+.members ul {
+  list-style: none;
+  padding: 0;
+}
+.members li {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  font-size: 13px;
+  padding: 8px 0;
+  overflow-wrap: anywhere;
+}
+.members li small {
+  color: var(--muted);
+  margin-left: 5px;
+}
+@media (max-width: 1000px) {
+  .chat-shell {
+    grid-template-columns: 225px minmax(0, 1fr) 180px;
+  }
+  .room-rail {
+    padding: 24px 14px;
+  }
+  .members {
+    padding: 28px 16px;
+  }
+}
+@media (max-width: 760px) {
+  .chat-shell {
+    height: auto;
+    min-height: 100dvh;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+  }
+  .app-header {
+    padding: 18px 20px;
+  }
+  .brand-mark {
+    display: none;
+  }
+  h1 {
+    font-size: 20px;
+  }
+  .connection {
+    font-size: 11px;
+  }
+  .room-rail {
+    border-right: 0;
+    padding: 20px;
+  }
+  .room-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .room {
+    padding: 10px 6px;
+    gap: 4px;
+  }
+  .room-icon {
+    width: 22px;
+  }
+  .room small {
+    display: none;
+  }
+  .guest {
+    margin-top: 16px;
+    padding-top: 16px;
+  }
+  .guest h2 {
+    margin-bottom: 14px;
+  }
+  .rail-note,
+  .member-note {
+    display: none;
+  }
+  .members {
+    grid-row: 3;
+    border-left: 0;
+    border-bottom: 1px solid var(--line);
+    padding: 14px 20px;
+  }
+  .members .hint {
+    margin: 8px 0;
+  }
+  .members ul {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .members li {
+    padding: 4px 0;
+  }
+}

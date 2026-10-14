@@ -1,0 +1,101 @@
+<header class="conversation-header">
+  <div>
+    <p class="utility">PUBLIC ROOM</p>
+    <h2><span aria-hidden="true">#</span> {{ room()?.name ?? 'Conversation' }}</h2>
+    <p class="muted">{{ room()?.description ?? 'Choose a room and introduce yourself.' }}</p>
+  </div>
+  <span class="history-note utility">LATEST 100</span>
+</header>
+<p id="chat-error" class="feedback connection-feedback" role="alert" [hidden]="!chat.error()">
+  {{ chat.error() }}
+</p>
+<div
+  #messageList
+  class="message-list"
+  role="log"
+  aria-label="Room messages"
+  aria-live="polite"
+  aria-relevant="additions"
+  (scroll)="onScroll()"
+>
+  @if (!chat.selectedRoom()) {
+    <div class="empty">
+      <span class="empty-mark" aria-hidden="true">#</span>
+      <h3>A room for your next idea</h3>
+      <p>Choose a room, enter your display name,<br />and join the conversation.</p>
+    </div>
+  } @else if (chat.state() === 'connecting') {
+    <div class="empty">
+      <h3>Joining {{ chat.selectedRoom()?.name }}…</h3>
+      <p>Getting the latest conversation and guests.</p>
+    </div>
+  } @else if (!chat.messages().length) {
+    <div class="empty">
+      <span class="empty-mark" aria-hidden="true">#</span>
+      <h3>
+        {{ chat.state() === 'reconnecting' ? 'Waiting to reconnect' : 'Start the conversation' }}
+      </h3>
+      <p>
+        {{
+          chat.state() === 'reconnecting'
+            ? 'Your draft will be here when the connection returns.'
+            : 'No messages yet. Say hello or share what you’re working on.'
+        }}
+      </p>
+    </div>
+  }
+  @for (message of chat.messages(); track message.id) {
+    <article class="message" [class.own]="message.senderId === chat.sessionId()">
+      <span class="avatar" aria-hidden="true">{{ initial(message.senderName) }}</span>
+      <div class="message-body">
+        <div class="message-meta">
+          <strong>{{ message.senderName }}</strong>
+          @if (message.senderId === chat.sessionId()) {
+            <span class="you">you</span>
+          }
+          <time
+            [attr.datetime]="message.createdAt"
+            [title]="(message.createdAt | date: 'medium') ?? ''"
+            >{{ message.createdAt | date: 'shortTime' }}</time
+          >
+        </div>
+        <p>{{ message.content }}</p>
+      </div>
+    </article>
+  }
+</div>
+<form id="composer" class="composer" (submit)="send($event)">
+  <label for="message">Message {{ room()?.name ?? 'room' }}</label>
+  <div class="compose-row">
+    <textarea
+      id="message"
+      name="message"
+      rows="2"
+      [value]="draft()"
+      (input)="draft.set($any($event.target).value)"
+      (keydown)="onComposerKey($event)"
+      (compositionstart)="composing.set(true)"
+      (compositionend)="composing.set(false)"
+      [disabled]="chat.state() !== 'connected'"
+      [placeholder]="
+        chat.state() === 'connected'
+          ? 'Share an idea, ask a question…'
+          : 'Join and connect to send a message'
+      "
+      aria-describedby="composer-hint chat-error"
+      [attr.aria-invalid]="draftLength() > 1000 ? true : null"
+    ></textarea
+    ><button
+      type="submit"
+      class="primary"
+      data-action="send"
+      [disabled]="chat.state() !== 'connected'"
+    >
+      Send <span aria-hidden="true">↑</span>
+    </button>
+  </div>
+  <div id="composer-hint" class="compose-hint">
+    <span>Enter to send · Shift + Enter for a new line</span
+    ><span class="utility" [class.feedback]="draftLength() > 1000">{{ draftLength() }} / 1000</span>
+  </div>
+</form>

@@ -1,3 +1,111 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --slate: #172b3a;
+  --teal: #176e72;
+  --pale: #edf4f6;
+  --white: #ffffff;
+  --muted: #607783;
+  --warning: #a54435;
+  --line: #d5e2e7;
+  --sans: ui-rounded, 'SF Pro Rounded', 'Segoe UI', system-ui, sans-serif;
+  --mono: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  color: var(--slate);
+  background: var(--pale);
+  font-family: var(--sans);
+  font-synthesis: none;
+}
+* {
+  box-sizing: border-box;
+}
+body,
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+textarea:disabled {
+  background: var(--pale);
+  color: var(--muted);
+}
+button.primary,
+button.secondary {
+  border-radius: 7px;
+  padding: 11px 15px;
+  font-size: 13px;
+  font-weight: 650;
+  border: 1px solid var(--teal);
+}
+button.primary {
+  background: var(--teal);
+  color: var(--white);
+}
+button.primary:hover:not(:disabled) {
+  background: #125a5e;
+}
+button.secondary {
+  background: transparent;
+  color: var(--teal);
+}
+button.secondary:hover {
+  background: var(--white);
+}
+.primary > span {
+  margin-left: 8px;
+}
+:focus-visible {
+  outline: 3px solid var(--teal);
+  outline-offset: 3px;
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+}
+[aria-invalid='true'] {
+  border-color: var(--warning) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+}
 
-@import 'tailwindcss';
+.utility,
+.eyebrow {
+  font: 11px var(--mono);
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+.utility {
+  margin-bottom: 6px;
+}
+.hint {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 9px 0 16px;
+}
+.muted {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.feedback {
+  color: var(--warning);
+  font-size: 12px;
+  line-height: 1.6;
+}

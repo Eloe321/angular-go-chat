@@ -1,0 +1,180 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+.conversation-header {
+  padding: 26px 28px 22px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+h2 {
+  font-size: 24px;
+  letter-spacing: -0.6px;
+  margin-bottom: 8px;
+}
+h2 span {
+  color: var(--teal);
+}
+.history-note {
+  align-self: flex-start;
+  white-space: nowrap;
+  font-size: 10px;
+}
+.message-list {
+  overflow: auto;
+  flex: 1;
+  padding: 12px 28px;
+  overscroll-behavior: contain;
+}
+.empty {
+  display: grid;
+  place-content: center;
+  text-align: center;
+  min-height: 100%;
+  padding: 40px 8px;
+}
+.empty-mark {
+  font: 36px var(--mono);
+  color: var(--teal);
+  margin-bottom: 16px;
+}
+.empty h3 {
+  font-size: 19px;
+  margin-bottom: 10px;
+}
+.empty p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--muted);
+  max-width: 390px;
+}
+.message {
+  display: flex;
+  gap: 12px;
+  padding: 15px 0;
+}
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--pale);
+  color: var(--teal);
+  font-weight: 700;
+  flex: none;
+}
+.message-body {
+  min-width: 0;
+  flex: 1;
+}
+.message-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+.message-meta strong {
+  overflow-wrap: anywhere;
+}
+.message time {
+  font: 10px var(--mono);
+  color: var(--muted);
+  margin-left: auto;
+}
+.you {
+  font-size: 10px;
+  color: var(--teal);
+}
+.message-body p {
+  font-size: 14px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.composer {
+  padding: 18px 28px 20px;
+  border-top: 1px solid var(--line);
+  background: var(--white);
+}
+.composer label {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 9px;
+}
+.compose-row {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+.compose-row textarea {
+  resize: vertical;
+  width: 100%;
+  min-width: 0;
+  min-height: 64px;
+  max-height: 180px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.compose-row button {
+  align-self: flex-end;
+  min-height: 43px;
+}
+.compose-hint {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 9px;
+}
+.compose-hint .utility {
+  font-size: 10px;
+  letter-spacing: 0;
+  margin: 0;
+  white-space: nowrap;
+}
+.connection-feedback {
+  padding: 12px 28px;
+  background: var(--pale);
+}
+@media (max-width: 1000px) {
+  .history-note {
+    display: none;
+  }
+}
+@media (max-width: 760px) {
+  :host {
+    grid-row: 4;
+    min-height: 60dvh;
+  }
+  .conversation-header {
+    padding: 22px 20px 18px;
+  }
+  .message-list {
+    padding: 10px 20px;
+    max-height: 60dvh;
+    min-height: 200px;
+  }
+  .composer {
+    padding: 16px 20px;
+    position: sticky;
+    bottom: 0;
+  }
+  .compose-hint {
+    font-size: 9px;
+  }
+  .empty {
+    min-height: 200px;
+  }
+  .empty p {
+    font-size: 13px;
+  }
+}
